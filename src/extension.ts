@@ -5,8 +5,15 @@ import * as net from 'net';
 
 const L = console.log;
 const MSG = vscode.window.showInformationMessage;
-function unixStylePath(path:any) {
-	return path.toString().replace(/\\/g, '/');
+function unixRelativePath(uri:vscode.Uri|undefined) {
+	let wsfolder = vscode.workspace.workspaceFolders;
+	if (uri !== undefined && wsfolder !== undefined){
+		let wsf_uri = wsfolder[0].uri;
+		return uri.toString().replace(wsf_uri.toString()+"/", "");
+	}
+	else {
+		return 'undefined';
+	}
 }
 
 //global variables
@@ -79,8 +86,8 @@ class FzfTerminal {
 }
 var findLine = new FzfTerminal(
 	'findLine',
-	() => { return `rg --vimgrep '$' '${unixStylePath(vscode.window.activeTextEditor?.document.fileName)}'` },
-	() => { return `${vscode.window.activeTextEditor?.document.fileName}`}
+	() => { return `rg --vimgrep "$" "${unixRelativePath(vscode.window.activeTextEditor?.document.uri)}"` },
+	() => { return `${vscode.window.activeTextEditor?.document.uri.toString()}`}
 );
 var findLineInFiles:FzfTerminal = new FzfTerminal(
 	'findLineInFiles',
