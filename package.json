@@ -21,7 +21,7 @@
 			},
 			{
 				"command": "fuzzyfind.findLineInFiles",
-				"title": "FuzzyFind: Find Line in All Files"
+				"title": "FuzzyFind: Find Line in all Files"
 			},
 			{
 				"command": "fuzzyfind.findSymbol",
