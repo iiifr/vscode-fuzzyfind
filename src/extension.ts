@@ -9,7 +9,7 @@ function unixRelativePath(uri:vscode.Uri|undefined) {
 	let wsfolder = vscode.workspace.workspaceFolders;
 	if (uri !== undefined && wsfolder !== undefined){
 		let wsf_uri = wsfolder[0].uri;
-		return uri.toString().replace(wsf_uri.toString()+"/", "");
+		return uri.toString().replace(`${wsf_uri.toString()}/`, "");
 	}
 	else {
 		return 'undefined';
@@ -86,16 +86,25 @@ class FzfTerminal {
 }
 var findLine = new FzfTerminal(
 	'findLine',
-	() => { return `rg --vimgrep "$" "${unixRelativePath(vscode.window.activeTextEditor?.document.uri)}"` },
+	() => { return `rg -H -n "$" "${unixRelativePath(vscode.window.activeTextEditor?.document.uri)}"` },
+	//() => { return `rg --vimgrep "$" "${unixRelativePath(vscode.window.activeTextEditor?.document.uri)}"` },
 	() => { return `${vscode.window.activeTextEditor?.document.uri.toString()}`}
 );
 var findLineInFiles:FzfTerminal = new FzfTerminal(
 	'findLineInFiles',
-	() => { return 'rg --vimgrep --no-ignore --glob "**/*.h" --glob "**/*.c" --glob "**/*.[Ss]" "$"' },
-	() => { return 'all'}
+	() => { return 'rg -H -n --no-ignore --glob "**/*.h" --glob "**/*.c" --glob "**/*.[Ss]" "$"' },
+	() => { return 'consistent'}
 );
-var findSymbol:FzfTerminal;
-var findSymbolInFiles:FzfTerminal;
+var findSymbol = new FzfTerminal(
+	'findSymbol',
+	() => { return `global --result=grep -f "${unixRelativePath(vscode.window.activeTextEditor?.document.uri)}"` },
+	() => { return `${vscode.window.activeTextEditor?.document.uri.toString()}`}
+);
+var findSymbolInFiles = new FzfTerminal(
+	'findSymbolInFiles',
+	() => { return `global --result=grep -e ".+"` },
+	() => { return 'consistent'}
+);
 // ---------------------
 var activeTerminal:any = undefined;
 var test:FzfTerminal;
@@ -114,7 +123,7 @@ export function activate(context: vscode.ExtensionContext) {
 			let m = c.toString().match(RE_DOC_LOCATION_PATTERN);
 			let ws_uri = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri : undefined;
 			if (m && ws_uri) {
-				//L(m[1] + " L" + m[2] + (m[3] ? "C" + m[3] : ""));
+				//L(`${m[1]} L${m[2]} ${m[3] ? `C${m[3]}`: ""}`);
 				//L("LEN " + m.length);
 				let path = m[1].replace(/\\\\/g, '\\');
 				let uri = vscode.Uri.joinPath(ws_uri, path);
@@ -124,7 +133,7 @@ export function activate(context: vscode.ExtensionContext) {
 				//L(uri + " " + pos.line + " " + pos.character);
 				vscode.window.showTextDocument(
 					uri,
-					{preserveFocus: true, preview: false, selection: sel}
+					{preserveFocus: false, preview: false, selection: sel}
 				);
 				//workbench.action.terminal.focus
 			}
@@ -150,6 +159,12 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findLineInFiles', () => {
 		findLineInFiles.show();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findSymbol', () => {
+		findSymbol.show();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findSymbolInFiles', () => {
+		findSymbolInFiles.show();
 	}));
 }
 

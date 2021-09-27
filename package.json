@@ -17,19 +17,19 @@
 		"commands": [
 			{
 				"command": "fuzzyfind.findLine",
-				"title": "FuzzyFind: Find Line in the File"
+				"title": "FuzzyFind: Find Line"
 			},
 			{
 				"command": "fuzzyfind.findLineInFiles",
-				"title": "FuzzyFind: Find Line in all Files"
+				"title": "FuzzyFind: Find Line in Files"
 			},
 			{
 				"command": "fuzzyfind.findSymbol",
-				"title": "FuzzyFind: Find Symbol in the File"
+				"title": "FuzzyFind: Find Symbol"
 			},
 			{
 				"command": "fuzzyfind.findSymbolInFiles",
-				"title": "FuzzyFind: Find Symbol in all Files"
+				"title": "FuzzyFind: Find Symbol in Files"
 			},
 			{
 				"command": "fuzzyfind.test",
