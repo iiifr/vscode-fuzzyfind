@@ -20,6 +20,7 @@ Available keys please reference to fzf man page:
 * `fuzzyfind.fzfKeySelect`: Key to select fzf menu entry, default: `alt-o`
 * `fuzzyfind.fzfKeyReload`: Key to reolod fzf menu, default: `alt-f`
 
+Other settings:
 * `fuzzyfind.findLineInFilesRgOption`: The option passed to `rg` at command `fuzzyfind.findLineInFiles`, default: `--no-ignore --glob "**/*.h" --glob "**/*.c" --glob "**/*.[Ss]"`
 
 ## Release Notes

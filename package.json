@@ -3,8 +3,9 @@
 	"displayName": "FuzzyFind",
 	"description": "Fuzzy find text or symbol in workspace",
 	"repository": {
-		"url": ""
+		"url": "https://github.com/iiifr/vscode-fuzzyfind"
 	},
+	"publisher": "iiifr",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.53.2"
