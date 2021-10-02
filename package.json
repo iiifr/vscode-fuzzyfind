@@ -1,7 +1,10 @@
 {
 	"name": "fuzzyfind",
 	"displayName": "FuzzyFind",
-	"description": "Fuzzy find text or symbol",
+	"description": "Fuzzy find text or symbol in workspace",
+	"repository": {
+		"url": ""
+	},
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.53.2"
@@ -35,7 +38,52 @@
 				"command": "fuzzyfind.test",
 				"title": "FuzzyFind: Test"
 			}
-		]
+		],
+		"configuration": {
+			"title": "FuzzyFind",
+			"properties": {
+				"fuzzyfind.fzfKeyDown": {
+					"type": "string",
+					"default": "alt-j",
+					"description": "Key to move down in fzf interface"
+				},
+				"fuzzyfind.fzfKeyUp": {
+					"type": "string",
+					"default": "alt-k",
+					"description": "Key move up in fzf interface"
+				},
+				"fuzzyfind.fzfKeyPageDown": {
+					"type": "string",
+					"default": "alt-d",
+					"description": "Key to page down in fzf interface"
+				},
+				"fuzzyfind.fzfKeyPageUp": {
+					"type": "string",
+					"default": "alt-u",
+					"description": "Key to page up in fzf interface"
+				},
+				"fuzzyfind.fzfKeyTop": {
+					"type": "string",
+					"default": "alt-b",
+					"description": "Key to go to top of menu in fzf interface"
+				},
+				"fuzzyfind.fzfKeySelect": {
+					"type": "string",
+					"default": "alt-o",
+					"description": "Key to select entry in fzf interface"
+				},
+				"fuzzyfind.fzfKeyReload": {
+					"type": "string",
+					"default": "alt-f",
+					"description": "Key to reload content in fzf interface"
+				},
+				"fuzzyfind.findLineInFilesRgOption": {
+					"type": "string",
+					"default": "--no-ignore --glob \"**/*.h\" --glob \"**/*.c\" --glob \"**/*.[Ss]\"",
+					"description": "Rg command option for fuzzyfind.findLineInFiles"
+				}
+			}
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

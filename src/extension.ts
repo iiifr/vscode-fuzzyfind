@@ -28,16 +28,19 @@ var PIPE_NAME:string;
 var PIPE_PATH:string;
 var RE_DOC_LOCATION_PATTERN:RegExp;
 // --------------
-var FZF_KeyDown:string;
-var FZF_KeyUp:string;
-var FZF_KeyPageDown:string;
-var FZF_KeyPageUp:string;
-var FZF_KeyTop:string;
-var FZF_KeySelect:string;
-var FZF_KeyReload:string;
-var FZF_DEFAULT_OPTS_BASE:string;
 var FUZZYFIND_LOCKFILE_PATH:string;
 var FUZZYFIND_LOCKFILE_ABSPATH:string;
+// --------------
+var FZF_KeyDown:string|undefined;
+var FZF_KeyUp:string|undefined;
+var FZF_KeyPageDown:string|undefined;
+var FZF_KeyPageUp:string|undefined;
+var FZF_KeyTop:string|undefined;
+var FZF_KeySelect:string|undefined;
+var FZF_KeyReload:string|undefined;
+var FZF_DEFAULT_OPTS_BASE:string;
+// --------------
+var FINDLINEINFILES_RG_OPT:string|undefined;
 
 
 
@@ -99,8 +102,8 @@ class FzfTerminal {
 
 		if (typecmd) {
 			let cmd = ''
-			let opts = `--bind '${FZF_KeyReload}:reload(${this.command()})'`
 			cmd += `echo "" > "${FUZZYFIND_LOCKFILE_PATH+this.lockfile}"; `
+			let opts = `--bind '${FZF_KeyReload}:reload(${this.command()})'`
 			cmd += `$env:FZF_DEFAULT_OPTS=$env:FZF_DEFAULT_OPTS_BASE+' ${this.dupq(opts)}'; `
 			cmd += `$env:FZF_DEFAULT_COMMAND='${this.dupq(this.command())}'; `
 			cmd += 'fzf; '
@@ -127,8 +130,8 @@ var findSymbolInFiles:FzfTerminal;
 // ---------------------
 var server: net.Server;
 // ----------------
-var activeTerminal:any = undefined;
-var test:FzfTerminal;
+//var activeTerminal:any = undefined;
+//var test:FzfTerminal;
 
 
 
@@ -160,13 +163,16 @@ export function activate(context: vscode.ExtensionContext) {
 	PIPE_NAME = `FP${crypto.randomBytes(3).toString('hex')}`;
 	PIPE_PATH = `\\\\.\\pipe\\${PIPE_NAME}`;
 	RE_DOC_LOCATION_PATTERN = /^["']?([^:]+):(\d+)(?::(\d+))?/;
-	FZF_KeyDown = 'alt-j';
-	FZF_KeyUp = 'alt-k';
-	FZF_KeyPageDown = 'alt-d';
-	FZF_KeyPageUp = 'alt-u';
-	FZF_KeyTop = 'alt-b';
-	FZF_KeySelect = 'alt-o';
-	FZF_KeyReload = 'alt-f';
+	// ---------
+	let fuzzyfindConfig = vsws.getConfiguration("fuzzyfind");
+	FZF_KeyDown = fuzzyfindConfig.get("fzfKeyDown");
+	FZF_KeyUp = fuzzyfindConfig.get("fzfKeyUp");
+	FZF_KeyPageDown = fuzzyfindConfig.get("fzfKeyPageDown");
+	FZF_KeyPageUp = fuzzyfindConfig.get("fzfKeyPageUp");
+	FZF_KeyTop = fuzzyfindConfig.get("fzfKeyTop");
+	FZF_KeySelect = fuzzyfindConfig.get("fzfKeySelect");
+	FZF_KeyReload = fuzzyfindConfig.get("fzfKeyReload");
+	FINDLINEINFILES_RG_OPT = fuzzyfindConfig.get("findLineInFilesRgOption");
 	FZF_DEFAULT_OPTS_BASE = `-d ':' --nth=3.. --bind=${FZF_KeyDown}:down,${FZF_KeyUp}:up,${FZF_KeyPageDown}:page-down,${FZF_KeyPageUp}:page-up,${FZF_KeyTop}:top --bind '${FZF_KeySelect}:execute(echo {1..2} | pipeout ${PIPE_NAME})'`;
 	if (vsws.workspaceFolders !== undefined){
 		fs.mkdir(`${vsws.workspaceFolders[0].uri.fsPath}\\.vscode`, (err)=>{})
@@ -189,7 +195,7 @@ export function activate(context: vscode.ExtensionContext) {
 	findLineInFiles = new FzfTerminal(
 		'findLineInFiles',
 		'fuzzyfind.findLineInFiles.lock',
-		() => { return 'rg -H -n --no-ignore --glob "**/*.h" --glob "**/*.c" --glob "**/*.[Ss]" "$"' },
+		() => { return `rg -H -n ${FINDLINEINFILES_RG_OPT} "$"` },
 		() => { return 'consistent'}
 	);
 	findSymbol = new FzfTerminal(
