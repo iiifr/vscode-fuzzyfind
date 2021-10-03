@@ -4,10 +4,11 @@ Use fzf, ripgrep, and GNU global(gtags) to fuzzy-find text or symbol in your vsc
 
 ## Requirements
 
-* For now only support vscode Windows version with powershell terminal
+**For now only support vscode Windows version with powershell terminal**
 * fzf
 * ripgrep
 * GNU global
+* self-written tool pipeout.exe (https://github.com/iiifr/vscode-fuzzyfind/tree/master/release)
 
 ## Extension Settings
 
@@ -28,3 +29,7 @@ Other settings:
 ### 0.0.1
 
 Initial release.
+
+### 0.0.2
+
+Fix auto-sent-to-terminal text missing

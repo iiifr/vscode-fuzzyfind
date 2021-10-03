@@ -20,6 +20,9 @@ function unixRelativePath(uri:vscode.Uri|undefined) {
 		return 'undefined';
 	}
 }
+//async function sleep(ms:number) {
+//	await new Promise(resolve => setTimeout(resolve, ms));
+//}
 
 
 
@@ -102,7 +105,7 @@ class FzfTerminal {
 
 		if (typecmd) {
 			let cmd = ''
-			cmd += `echo "" > "${FUZZYFIND_LOCKFILE_PATH+this.lockfile}"; `
+			cmd += `     echo "" > "${FUZZYFIND_LOCKFILE_PATH+this.lockfile}"; `
 			let opts = `--bind '${FZF_KeyReload}:reload(${this.command()})'`
 			cmd += `$env:FZF_DEFAULT_OPTS=$env:FZF_DEFAULT_OPTS_BASE+' ${this.dupq(opts)}'; `
 			cmd += `$env:FZF_DEFAULT_COMMAND='${this.dupq(this.command())}'; `
