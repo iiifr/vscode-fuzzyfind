@@ -91,6 +91,7 @@ class FzfTerminal {
 		let typecmd = false;
 		if (this.isInvalidTerminal()) {
 			this.terminal?.dispose();
+			this.delLockFile();
 			this.terminal = vswin.createTerminal({
 				name: this.name,
 				env: {FZF_DEFAULT_OPTS_BASE},
