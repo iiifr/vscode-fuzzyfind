@@ -86,11 +86,14 @@ class FzfTerminal {
 			//L(`*DEL LOCK* ${err}`);
 		});
 	}
+	delTerminal() {
+		this.terminal?.dispose();
+	}
 	show() {
 		//L(`*show* invalidTerm=${this.isInvalidTerminal()} currentSt=${this.currentStatus} st=${this.status()} hasLock=${this.hasLockFile()}`);
 		let typecmd = false;
 		if (this.isInvalidTerminal()) {
-			this.terminal?.dispose();
+			this.delTerminal();
 			this.delLockFile();
 			this.terminal = vswin.createTerminal({
 				name: this.name,
@@ -282,6 +285,10 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
 	if (extActivated) {
 		server.close();
+		findLine.delTerminal();
+		findLineInFiles.delTerminal();
+		findSymbol.delTerminal();
+		findSymbolInFiles.delTerminal();
 		findLine.delLockFile();
 		findLineInFiles.delLockFile();
 		findSymbol.delLockFile();
