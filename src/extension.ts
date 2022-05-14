@@ -20,44 +20,34 @@ function unixRelativePath(uri:vscode.Uri|undefined) {
 		return 'undefined';
 	}
 }
+function getWordUnderCursor() {
+	let s = 'NO WORD :('
+	if (vswin.activeTextEditor) {
+		let pos = vswin.activeTextEditor.selection.active;
+		let range = vswin.activeTextEditor.document.getWordRangeAtPosition(pos);
+		if (range !== undefined) {
+			s = vswin.activeTextEditor.document.getText(range);
+		}
+	}
+	return s;
+}
 //async function sleep(ms:number) {
 //	await new Promise(resolve => setTimeout(resolve, ms));
 //}
 
 
 
-//// setting variables ////////////////////////
-var PIPE_NAME:string;
-var PIPE_PATH:string;
-var RE_DOC_LOCATION_PATTERN:RegExp;
-// --------------
-var FUZZYFIND_LOCKFILE_PATH:string;
-var FUZZYFIND_LOCKFILE_ABSPATH:string;
-// --------------
-var FZF_KeyDown:string|undefined;
-var FZF_KeyUp:string|undefined;
-var FZF_KeyPageDown:string|undefined;
-var FZF_KeyPageUp:string|undefined;
-var FZF_KeyTop:string|undefined;
-var FZF_KeySelect:string|undefined;
-var FZF_KeyReload:string|undefined;
-var FZF_DEFAULT_OPTS_BASE:string;
-// --------------
-var FINDLINEINFILES_RG_OPT:string|undefined;
-
-
-
 //// type fzf terminal //////////////////////
 class FzfTerminal {
-	private terminal:vscode.Terminal|undefined;
-	//private terminalOpt:vscode.TerminalOptions;
-	private name:string;
-	private lockfile:string;
-	private command:()=>string;
-	private status:()=>string;
-	private currentStatus:string;
+	readonly name:string;
+	readonly lockfile:string;
+	protected terminal:vscode.Terminal|undefined;
+	protected command:()=>string;
+	protected status:()=>string;
 	// ---------------
-	private dupq = (s:string)=>{ return s.replace(/'/g, "''") }
+	protected currentStatus:string;
+	// ---------------
+	protected dupq = (s:string)=>{ return s.replace(/'/g, "''") }
 
 	constructor(terminalName:string, lockfileName:string, findCommand:()=>string, status:()=>string) {
 		this.terminal = undefined;
@@ -81,12 +71,8 @@ class FzfTerminal {
 	hasLockFile() {
 		return fs.existsSync(FUZZYFIND_LOCKFILE_ABSPATH + this.lockfile);
 	}
-	delLockFile() {
-		fs.unlink(FUZZYFIND_LOCKFILE_ABSPATH + this.lockfile, (err) => {
-			//L(`*DEL LOCK* ${err}`);
-		});
-	}
 	delTerminal() {
+		fs.unlink(FUZZYFIND_LOCKFILE_ABSPATH + this.lockfile, (err)=>{}); //delete lock file
 		this.terminal?.dispose();
 	}
 	show() {
@@ -94,10 +80,9 @@ class FzfTerminal {
 		let typecmd = false;
 		if (this.isInvalidTerminal()) {
 			this.delTerminal();
-			this.delLockFile();
 			this.terminal = vswin.createTerminal({
 				name: this.name,
-				env: {FZF_DEFAULT_OPTS_BASE},
+				env: {FZF_DEFAULT_OPTS},
 				strictEnv: false
 			});
 			typecmd = true;
@@ -110,10 +95,9 @@ class FzfTerminal {
 		if (typecmd) {
 			let cmd = ''
 			cmd += `     echo "" > "${FUZZYFIND_LOCKFILE_PATH+this.lockfile}"; `
-			let opts = `--bind '${FZF_KeyReload}:reload(${this.command()})'`
-			cmd += `$env:FZF_DEFAULT_OPTS=$env:FZF_DEFAULT_OPTS_BASE+' ${this.dupq(opts)}'; `
 			cmd += `$env:FZF_DEFAULT_COMMAND='${this.dupq(this.command())}'; `
-			cmd += 'fzf; '
+			let opts = `--bind "${FZF_KeyReload}:reload($env:FZF_DEFAULT_COMMAND)"`
+			cmd += `fzf ${opts}; `
 			cmd += `rm -Force "${FUZZYFIND_LOCKFILE_PATH+this.lockfile}"; `
 			//L(`*CMD* ${cmd}`)
 			this.terminal?.sendText(cmd, true)
@@ -124,21 +108,90 @@ class FzfTerminal {
 		//L("show");
 	}
 }
+class FzfTerminalMultiUse extends FzfTerminal {
+	//private names:{string:number};
+	private currentUsage:string;
+	private commands:{[key:string]:(()=>string)};
+	private statuses:{[key:string]:(()=>string)};
 
+	constructor(terminalName:string, lockfileName:string) {
+		super(
+			terminalName,
+			lockfileName,
+			() => {return ''},
+			() => {return `${this.currentUsage}:${this.status()}`},
+		);
+		this.currentUsage = '';
+		this.commands = {};
+		this.statuses = {};
+	}
+
+	setUsage(usageName:string) {
+		this.currentUsage = usageName;
+		this.command = this.commands[usageName];
+		this.status = this.statuses[usageName];
+	}
+	addUsage(uasgeName:string, findCommand:()=>string, status:()=>string) {
+		this.commands[uasgeName] = findCommand;
+		this.statuses[uasgeName] = status;
+	}
+}
 
 
 //// global variables ////////////////////////
 var extActivated:boolean;
 // ---------------------
-var findLine:FzfTerminal;
+//var fzfTerminals:FzfTerminal[];
+//var findLine:FzfTerminal;
 var findLineInFiles:FzfTerminal;
-var findSymbol:FzfTerminal;
-var findSymbolInFiles:FzfTerminal;
+//var findSymbol:FzfTerminal;
+//var findSymbolInFiles:FzfTerminal;
+var fzfMultiUse:FzfTerminalMultiUse;
 // ---------------------
 var server: net.Server;
 // ----------------
 //var activeTerminal:any = undefined;
 //var test:FzfTerminal;
+
+
+
+//// extention setting ////////////////////////
+var PIPE_NAME:string;
+var PIPE_PATH:string;
+var RE_DOC_LOCATION_PATTERN:RegExp;
+// --------------
+var FUZZYFIND_LOCKFILE_PATH:string;
+var FUZZYFIND_LOCKFILE_ABSPATH:string;
+// --------------
+var FZF_KeyDown:string|undefined;
+var FZF_KeyUp:string|undefined;
+var FZF_KeyPageDown:string|undefined;
+var FZF_KeyPageUp:string|undefined;
+var FZF_KeyTop:string|undefined;
+var FZF_KeySelect:string|undefined;
+var FZF_KeyReload:string|undefined;
+var FZF_KeyClear:string|undefined;
+var FZF_OTHER_OPT:string|undefined;
+var FZF_DEFAULT_OPTS:string;
+// --------------
+var FINDLINEINFILES_RG_OPT:string|undefined;
+var FINDWORDINFILES_RG_OPT:string|undefined;
+// --------------
+function setup() {
+	let fuzzyfindConfig = vsws.getConfiguration("fuzzyfind");
+	FINDLINEINFILES_RG_OPT = fuzzyfindConfig.get("findLineInFilesRgOption");
+	FINDWORDINFILES_RG_OPT = fuzzyfindConfig.get("findWordInFilesRgOption");
+	FZF_KeyDown = fuzzyfindConfig.get("fzfKeyDown");
+	FZF_KeyUp = fuzzyfindConfig.get("fzfKeyUp");
+	FZF_KeyPageDown = fuzzyfindConfig.get("fzfKeyPageDown");
+	FZF_KeyPageUp = fuzzyfindConfig.get("fzfKeyPageUp");
+	FZF_KeyTop = fuzzyfindConfig.get("fzfKeyTop");
+	FZF_KeySelect = fuzzyfindConfig.get("fzfKeySelect");
+	FZF_KeyReload = fuzzyfindConfig.get("fzfKeyReload");
+	FZF_KeyClear = fuzzyfindConfig.get("fzfKeyClear");
+	FZF_OTHER_OPT = fuzzyfindConfig.get("fzfOtherOption");
+	FZF_DEFAULT_OPTS = `-d '[^\\/]+:[0-9]+:' --nth=2.. ${FZF_OTHER_OPT} --bind=${FZF_KeyDown}:down,${FZF_KeyUp}:up,${FZF_KeyPageDown}:page-down,${FZF_KeyPageUp}:page-up,${FZF_KeyTop}:top,${FZF_KeyClear}:clear-query --bind='${FZF_KeySelect}:execute(echo {1..2} | pipeout ${PIPE_NAME})'`;
+}
 
 
 
@@ -171,16 +224,15 @@ export function activate(context: vscode.ExtensionContext) {
 	PIPE_PATH = `\\\\.\\pipe\\${PIPE_NAME}`;
 	RE_DOC_LOCATION_PATTERN = /^["']?([^:]+):(\d+)(?::(\d+))?/;
 	// ---------
-	let fuzzyfindConfig = vsws.getConfiguration("fuzzyfind");
-	FZF_KeyDown = fuzzyfindConfig.get("fzfKeyDown");
-	FZF_KeyUp = fuzzyfindConfig.get("fzfKeyUp");
-	FZF_KeyPageDown = fuzzyfindConfig.get("fzfKeyPageDown");
-	FZF_KeyPageUp = fuzzyfindConfig.get("fzfKeyPageUp");
-	FZF_KeyTop = fuzzyfindConfig.get("fzfKeyTop");
-	FZF_KeySelect = fuzzyfindConfig.get("fzfKeySelect");
-	FZF_KeyReload = fuzzyfindConfig.get("fzfKeyReload");
-	FINDLINEINFILES_RG_OPT = fuzzyfindConfig.get("findLineInFilesRgOption");
-	FZF_DEFAULT_OPTS_BASE = `-d ':' --nth=3.. --bind=${FZF_KeyDown}:down,${FZF_KeyUp}:up,${FZF_KeyPageDown}:page-down,${FZF_KeyPageUp}:page-up,${FZF_KeyTop}:top --bind '${FZF_KeySelect}:execute(echo {1..2} | pipeout ${PIPE_NAME})'`;
+	setup();
+	vsws.onDidChangeConfiguration(event => {
+		let affected = event.affectsConfiguration("fuzzyfind");
+		if (affected) {
+			findLineInFiles.delTerminal();
+			fzfMultiUse.delTerminal();
+			setup();
+		}
+	})
 	if (vsws.workspaceFolders !== undefined){
 		fs.mkdir(`${vsws.workspaceFolders[0].uri.fsPath}\\.vscode`, (err)=>{})
 		FUZZYFIND_LOCKFILE_PATH = '.vscode\\'
@@ -192,31 +244,61 @@ export function activate(context: vscode.ExtensionContext) {
 	// ---------------------------------
 	// --- initialize fzf terminals
 	// ---------------------------------
-	findLine = new FzfTerminal(
-		'findLine',
-		'fuzzyfind.findLine.lock',
-		() => { return `rg -H -n "$" "${unixRelativePath(vswin.activeTextEditor?.document.uri)}"` },
-		//() => { return `rg --vimgrep "$" "${unixRelativePath(vswin.activeTextEditor?.document.uri)}"` },
-		() => { return `${vswin.activeTextEditor?.document.uri.toString()}`}
-	);
+	//findLine = new FzfTerminal(
+	//	'findLine',
+	//	'fuzzyfind.findLine.lock',
+	//	() => { return `rg -H -n "$" "${unixRelativePath(vswin.activeTextEditor?.document.uri)}"` },
+	//	//() => { return `rg --vimgrep "$" "${unixRelativePath(vswin.activeTextEditor?.document.uri)}"` },
+	//	() => { return `${vswin.activeTextEditor?.document.uri.toString()}`}
+	//);
 	findLineInFiles = new FzfTerminal(
 		'findLineInFiles',
 		'fuzzyfind.findLineInFiles.lock',
 		() => { return `rg -H -n ${FINDLINEINFILES_RG_OPT} "$"` },
 		() => { return 'consistent'}
 	);
-	findSymbol = new FzfTerminal(
+	//findSymbol = new FzfTerminal(
+	//	'findSymbol',
+	//	'fuzzyfind.findSymbol.lock',
+	//	() => { return `global --result=grep -f "${unixRelativePath(vswin.activeTextEditor?.document.uri)}"` },
+	//	() => { return `${vswin.activeTextEditor?.document.uri.toString()}`}
+	//);
+	//findSymbolInFiles = new FzfTerminal(
+	//	'findSymbolInFiles',
+	//	'fuzzyfind.findSymbolInFiles.lock',
+	//	() => { return `global --result=grep -e ".+"` },
+	//	() => { return 'consistent'}
+	//);
+	fzfMultiUse = new FzfTerminalMultiUse(
+		'fzfTerminal',
+		'fuzzyfind.fzfTerminal.lock',
+	);
+	fzfMultiUse.addUsage(
+		'findLine',
+		() => { return `rg -H -n "$" "${unixRelativePath(vswin.activeTextEditor?.document.uri)}"` },
+		() => { return `${vswin.activeTextEditor?.document.uri.toString()}`}
+	);
+	fzfMultiUse.addUsage(
+		'findWordInFiles',
+		() => { return `rg -H -n ${FINDWORDINFILES_RG_OPT} "${getWordUnderCursor()}"` },
+		getWordUnderCursor
+	);
+	fzfMultiUse.addUsage(
 		'findSymbol',
-		'fuzzyfind.findSymbol.lock',
 		() => { return `global --result=grep -f "${unixRelativePath(vswin.activeTextEditor?.document.uri)}"` },
 		() => { return `${vswin.activeTextEditor?.document.uri.toString()}`}
 	);
-	findSymbolInFiles = new FzfTerminal(
+	fzfMultiUse.addUsage(
 		'findSymbolInFiles',
-		'fuzzyfind.findSymbolInFiles.lock',
 		() => { return `global --result=grep -e ".+"` },
 		() => { return 'consistent'}
 	);
+	// ---------------------------------------
+	//fzfTerminals = [];
+	//fzfTerminals.push(findLine);
+	//fzfTerminals.push(findLineInFiles);
+	//fzfTerminals.push(findSymbol);
+	//fzfTerminals.push(findSymbolInFiles);
 
 
 
@@ -240,7 +322,7 @@ export function activate(context: vscode.ExtensionContext) {
 				//L(uri + " " + pos.line + " " + pos.character);
 				vswin.showTextDocument(
 					uri,
-					{preserveFocus: false, preview: false, selection: sel}
+					{preserveFocus: true, preview: true, selection: sel}
 				);
 				//workbench.action.terminal.focus
 			}
@@ -262,20 +344,29 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	//context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.test', () => {
-	////vswin.showInformationMessage('Hello World from FuzzyFind!');
-	//}));
+	//fzfTerminals.forEach((term) => {
+	//	context.subscriptions.push(vscode.commands.registerCommand(`fuzzyfind.${term.name}`, () => {
+	//		term.show();
+	//	}));
+	//});
 	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findLine', () => {
-		findLine.show();
+		fzfMultiUse.setUsage('findLine');
+		fzfMultiUse.show();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findLineInFiles', () => {
 		findLineInFiles.show();
 	}));
+	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findWordInFiles', () => {
+		fzfMultiUse.setUsage('findWordInFiles');
+		fzfMultiUse.show();
+	}));
 	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findSymbol', () => {
-		findSymbol.show();
+		fzfMultiUse.setUsage('findSymbol');
+		fzfMultiUse.show();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findSymbolInFiles', () => {
-		findSymbolInFiles.show();
+		fzfMultiUse.setUsage('findSymbolInFiles');
+		fzfMultiUse.show();
 	}));
 }
 
@@ -285,13 +376,10 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
 	if (extActivated) {
 		server.close();
-		findLine.delTerminal();
+		//fzfTerminals.forEach((term) => {
+		//	term.delTerminal();
+		//});
 		findLineInFiles.delTerminal();
-		findSymbol.delTerminal();
-		findSymbolInFiles.delTerminal();
-		findLine.delLockFile();
-		findLineInFiles.delLockFile();
-		findSymbol.delLockFile();
-		findSymbolInFiles.delLockFile();
+		fzfMultiUse.delTerminal();
 	}
 }

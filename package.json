@@ -28,6 +28,10 @@
 				"title": "FuzzyFind: Find Line in Files"
 			},
 			{
+				"command": "fuzzyfind.findWordInFiles",
+				"title": "FuzzyFind: Find the Word under Cursor in Files"
+			},
+			{
 				"command": "fuzzyfind.findSymbol",
 				"title": "FuzzyFind: Find Symbol"
 			},
@@ -78,10 +82,25 @@
 					"default": "alt-f",
 					"description": "Key to reload content in fzf interface"
 				},
+				"fuzzyfind.fzfKeyClear": {
+					"type": "string",
+					"default": "ctrl-u",
+					"description": "Key to reload content in fzf interface"
+				},
+				"fuzzyfind.fzfOtherOption": {
+					"type": "string",
+					"default": "--ansi --preview-window=up,2,wrap --preview='echo {}'",
+					"description": "fzf command additional option"
+				},
 				"fuzzyfind.findLineInFilesRgOption": {
 					"type": "string",
-					"default": "--no-ignore --glob \"**/*.h\" --glob \"**/*.c\" --glob \"**/*.[Ss]\"",
+					"default": "--color always --no-ignore --glob \"**/*.h\" --glob \"**/*.c\" --glob \"**/*.[Ss]\"",
 					"description": "Rg command option for fuzzyfind.findLineInFiles"
+				},
+				"fuzzyfind.findWordInFilesRgOption": {
+					"type": "string",
+					"default": "-w --color always --no-ignore --glob \"**/*.h\" --glob \"**/*.c\" --glob \"**/*.[Ss]\"",
+					"description": "Rg command option for fuzzyfind.findWordInFiles"
 				}
 			}
 		}
