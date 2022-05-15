@@ -110,25 +110,27 @@ class FzfTerminal {
 }
 class FzfTerminalMultiUse extends FzfTerminal {
 	private currentUsage:string;
-	private commands:{[key:string]:(()=>string)};
-	private statuses:{[key:string]:(()=>string)};
+	private commands:{[key:string]:()=>string};
+	private statuses:{[key:string]:()=>string};
+	private realStatus:()=>string;
 
 	constructor(terminalName:string, lockfileName:string) {
 		super(
 			terminalName,
 			lockfileName,
 			() => {return ''},
-			() => {return `${this.currentUsage}:${this.status()}`},
+			() => {return `${this.currentUsage}:${this.realStatus()}`},
 		);
 		this.currentUsage = '';
 		this.commands = {};
 		this.statuses = {};
+		this.realStatus = () => { return 'undefined';}
 	}
 
 	setUsage(usageName:string) {
 		this.currentUsage = usageName;
 		this.command = this.commands[usageName];
-		this.status = this.statuses[usageName];
+		this.realStatus = this.statuses[usageName];
 	}
 	addUsage(uasgeName:string, findCommand:()=>string, status:()=>string) {
 		this.commands[uasgeName] = findCommand;
