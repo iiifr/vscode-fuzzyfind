@@ -52,3 +52,7 @@ Delete lock files when start fuzzyfind terminal
 * fzf shows color
 * fzf now has in-terminal preview window
 * fzf commands use the same vscode terminal
+
+### 0.0.5
+
+Fix small bug
