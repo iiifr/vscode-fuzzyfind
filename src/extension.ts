@@ -109,7 +109,6 @@ class FzfTerminal {
 	}
 }
 class FzfTerminalMultiUse extends FzfTerminal {
-	//private names:{string:number};
 	private currentUsage:string;
 	private commands:{[key:string]:(()=>string)};
 	private statuses:{[key:string]:(()=>string)};
@@ -141,7 +140,6 @@ class FzfTerminalMultiUse extends FzfTerminal {
 //// global variables ////////////////////////
 var extActivated:boolean;
 // ---------------------
-//var fzfTerminals:FzfTerminal[];
 //var findLine:FzfTerminal;
 var findLineInFiles:FzfTerminal;
 //var findSymbol:FzfTerminal;
@@ -149,9 +147,6 @@ var findLineInFiles:FzfTerminal;
 var fzfMultiUse:FzfTerminalMultiUse;
 // ---------------------
 var server: net.Server;
-// ----------------
-//var activeTerminal:any = undefined;
-//var test:FzfTerminal;
 
 
 
@@ -293,12 +288,6 @@ export function activate(context: vscode.ExtensionContext) {
 		() => { return `global --result=grep -e ".+"` },
 		() => { return 'consistent'}
 	);
-	// ---------------------------------------
-	//fzfTerminals = [];
-	//fzfTerminals.push(findLine);
-	//fzfTerminals.push(findLineInFiles);
-	//fzfTerminals.push(findSymbol);
-	//fzfTerminals.push(findSymbolInFiles);
 
 
 
@@ -344,11 +333,6 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	//fzfTerminals.forEach((term) => {
-	//	context.subscriptions.push(vscode.commands.registerCommand(`fuzzyfind.${term.name}`, () => {
-	//		term.show();
-	//	}));
-	//});
 	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findLine', () => {
 		fzfMultiUse.setUsage('findLine');
 		fzfMultiUse.show();
@@ -376,9 +360,6 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
 	if (extActivated) {
 		server.close();
-		//fzfTerminals.forEach((term) => {
-		//	term.delTerminal();
-		//});
 		findLineInFiles.delTerminal();
 		fzfMultiUse.delTerminal();
 	}

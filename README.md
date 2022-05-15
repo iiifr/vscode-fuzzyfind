@@ -20,9 +20,13 @@ Available keys please reference to fzf man page:
 * `fuzzyfind.fzfKeyTop`: Key to go to top of fzf menu, default: `alt-b`
 * `fuzzyfind.fzfKeySelect`: Key to select fzf menu entry, default: `alt-o`
 * `fuzzyfind.fzfKeyReload`: Key to reolod fzf menu, default: `alt-f`
+* `fuzzyfind.fzfKeyClear`: Key to clear fzf query, default: `ctrl-u`
 
 Other settings:
-* `fuzzyfind.findLineInFilesRgOption`: The option passed to `rg` at command `fuzzyfind.findLineInFiles`, default: `--no-ignore --glob "**/*.h" --glob "**/*.c" --glob "**/*.[Ss]"`
+* `fuzzyfind.findLineInFilesRgOption`: The option passed to `rg` at command `fuzzyfind.findLineInFiles`
+* `fuzzyfind.findWordInFilesRgOption`: Like `findLineInFilesRgOption`, used in command `fuzzyfind.findWordInFiles`
+* `fuzzyfind.fzfOtherOption`: Additional fzf options
+
 
 ## Release Notes
 
@@ -37,3 +41,14 @@ Fix auto-sent-to-terminal text missing
 ### 0.0.3
 
 Delete lock files when start fuzzyfind terminal
+
+### 0.0.4
+
+* Add command 'fuzzyfind.findWordInFiles'
+* Add option 'fuzzyfind.fzfOtherOption'
+* Add option 'fuzzyfind.findWordInFilesRgOption'
+* Update extention configuration without restarting vscode
+* Detach vscode terminal when closing vscode
+* fzf shows color
+* fzf now has in-terminal preview window
+* fzf commands use the same vscode terminal
