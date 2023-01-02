@@ -26,6 +26,7 @@ Other settings:
 * `fuzzyfind.findLineInFilesRgOption`: The option passed to `rg` at command `fuzzyfind.findLineInFiles`
 * `fuzzyfind.findWordInFilesRgOption`: Like `findLineInFilesRgOption`, used in command `fuzzyfind.findWordInFiles`
 * `fuzzyfind.fzfOtherOption`: Additional fzf options
+* `fuzzyfind.gnuGlobalConfigPath`: Set path of gtags.conf
 
 
 ## Release Notes
@@ -56,3 +57,9 @@ Delete lock files when start fuzzyfind terminal
 ### 0.0.5
 
 Fix small bug
+
+### 0.0.6
+
+* Add command 'fuzzyfind.findDefInFiles'
+* Add command 'fuzzyfind.findRefInFiles'
+* Add option 'fuzzyfind.gnuGlobalConfigPath'
