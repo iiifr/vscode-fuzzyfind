@@ -32,6 +32,14 @@
 				"title": "FuzzyFind: Find the Word under Cursor in Files"
 			},
 			{
+				"command": "fuzzyfind.findDefInFiles",
+				"title": "FuzzyFind: Find symbol definition of the Word under Cursor in Files"
+			},
+			{
+				"command": "fuzzyfind.findRefInFiles",
+				"title": "FuzzyFind: Find symbol references of the Word under Cursor in Files"
+			},
+			{
 				"command": "fuzzyfind.findSymbol",
 				"title": "FuzzyFind: Find Symbol"
 			},
@@ -101,6 +109,11 @@
 					"type": "string",
 					"default": "-w --color always --no-ignore --glob \"**/*.h\" --glob \"**/*.c\" --glob \"**/*.[Ss]\"",
 					"description": "Rg command option for fuzzyfind.findWordInFiles"
+				},
+				"fuzzyfind.gnuGlobalConfigPath": {
+					"type": "string",
+					"default": ".\\.vscode\\gtags.conf",
+					"description": "Path of GNU global configuration"
 				}
 			}
 		}
