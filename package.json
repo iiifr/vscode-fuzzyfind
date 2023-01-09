@@ -110,9 +110,14 @@
 					"default": "-w --color always --no-ignore --glob \"**/*.h\" --glob \"**/*.c\" --glob \"**/*.[Ss]\"",
 					"description": "Rg command option for fuzzyfind.findWordInFiles"
 				},
+				"fuzzyfind.gnuGlobalOption": {
+					"type": "string",
+					"default": "--color=always",
+					"description": "GNU global command option"
+				},
 				"fuzzyfind.gnuGlobalConfigPath": {
 					"type": "string",
-					"default": ".\\.vscode\\gtags.conf",
+					"default": ".vscode/gtags.conf",
 					"description": "Path of GNU global configuration"
 				}
 			}

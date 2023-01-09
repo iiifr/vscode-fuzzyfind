@@ -161,7 +161,7 @@ var RE_DOC_LOCATION_PATTERN:RegExp;
 var FUZZYFIND_LOCKFILE_PATH:string;
 var FUZZYFIND_LOCKFILE_ABSPATH:string;
 // --------------
-var GNUGLOBAL_CONFIG_ARG:string;
+var GNUGLOBAL_CONFIG_OPT:string;
 
 
 
@@ -182,6 +182,8 @@ var FINDWORDINFILES_RG_OPT:string|undefined;
 // --------------
 var GNUGLOBAL_CONFIG_PATH:string;
 // --------------
+var GNUGLOBAL_OPT:string;
+// --------------
 function setup() {
 	let fuzzyfindConfig = vsws.getConfiguration("fuzzyfind");
 	FINDLINEINFILES_RG_OPT = fuzzyfindConfig.get("findLineInFilesRgOption");
@@ -197,6 +199,7 @@ function setup() {
 	FZF_OTHER_OPT = fuzzyfindConfig.get("fzfOtherOption");
 	FZF_DEFAULT_OPTS = `-d '[^\\/]+:[0-9]+:' --nth=2.. ${FZF_OTHER_OPT} --bind=${FZF_KeyDown}:down,${FZF_KeyUp}:up,${FZF_KeyPageDown}:page-down,${FZF_KeyPageUp}:page-up,${FZF_KeyTop}:top,${FZF_KeyClear}:clear-query --bind='${FZF_KeySelect}:execute(echo {1..2} | pipeout ${PIPE_NAME})'`;
 	GNUGLOBAL_CONFIG_PATH = fuzzyfindConfig.get("gnuGlobalConfigPath") ?? '';
+	GNUGLOBAL_OPT = fuzzyfindConfig.get("gnuGlobalOption") ?? '';
 }
 
 
@@ -255,9 +258,9 @@ export function activate(context: vscode.ExtensionContext) {
 		gconf_test_path = GNUGLOBAL_CONFIG_PATH;
 	}
 	if (fs.existsSync(gconf_test_path)){
-		GNUGLOBAL_CONFIG_ARG = `--gtagsconf ${GNUGLOBAL_CONFIG_PATH}`
+		GNUGLOBAL_CONFIG_OPT = `--gtagsconf="${GNUGLOBAL_CONFIG_PATH}"`
 	} else {
-		GNUGLOBAL_CONFIG_ARG = ''
+		GNUGLOBAL_CONFIG_OPT = ''
 	}
 
 
@@ -306,22 +309,22 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 	fzfMultiUse.addUsage(
 		'findDefInFiles',
-		() => { return `global ${GNUGLOBAL_CONFIG_ARG} --result=grep -d "${getWordUnderCursor()}"` },
+		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -d "${getWordUnderCursor()}"` },
 		getWordUnderCursor
 	);
 	fzfMultiUse.addUsage(
 		'findRefInFiles',
-		() => { return `global ${GNUGLOBAL_CONFIG_ARG} --result=grep -r "${getWordUnderCursor()}"` },
+		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -r "${getWordUnderCursor()}"` },
 		getWordUnderCursor
 	);
 	fzfMultiUse.addUsage(
 		'findSymbol',
-		() => { return `global ${GNUGLOBAL_CONFIG_ARG} --result=grep -f "${unixRelativePath(vswin.activeTextEditor?.document.uri)}"` },
+		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -f "${unixRelativePath(vswin.activeTextEditor?.document.uri)}"` },
 		() => { return `${vswin.activeTextEditor?.document.uri.toString()}`}
 	);
 	fzfMultiUse.addUsage(
 		'findSymbolInFiles',
-		() => { return `global ${GNUGLOBAL_CONFIG_ARG} --result=grep -e ".+"` },
+		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -e ".+"` },
 		() => { return 'consistent'}
 	);
 
