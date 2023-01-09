@@ -63,3 +63,7 @@ Fix small bug
 * Add command 'fuzzyfind.findDefInFiles'
 * Add command 'fuzzyfind.findRefInFiles'
 * Add option 'fuzzyfind.gnuGlobalConfigPath'
+
+### 0.0.7
+
+* Add option 'fuzzyfind.gnuGlobalOption'
