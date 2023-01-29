@@ -75,3 +75,7 @@ Fix small bug
 * Add these extention configs: logEnable, gnuGlobalDbDirectory gtagsUpdateDelay gtagsUpdateIgnoreGlob, gtagsUpdateWatchGlob, gtagsWholeUpdateFilesThreshold
 * Remove extention config: fzfKeyDown, fzfKeyUp, fzfKeyPageUp, fzfKeyPageDown, fzfKeyTop, fzfKeyClear
 * Change default value of these extentions configs: fzfKeySelect, fzfOtherOption
+
+### 0.0.9
+
+Fix missing minimatch module dependency bug

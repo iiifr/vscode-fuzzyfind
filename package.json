@@ -6,7 +6,7 @@
 		"url": "https://github.com/iiifr/vscode-fuzzyfind"
 	},
 	"publisher": "iiifr",
-	"version": "0.0.8",
+	"version": "0.0.9",
 	"engines": {
 		"vscode": "^1.53.2"
 	},
