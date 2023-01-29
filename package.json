@@ -48,6 +48,14 @@
 				"title": "FuzzyFind: Find Symbol in Files"
 			},
 			{
+				"command": "fuzzyfind.updateSymbols",
+				"title": "FuzzyFind: Update Gtags Symbols"
+			},
+			{
+				"command": "fuzzyfind.createSymbols",
+				"title": "FuzzyFind: (Re)Create Gtags Symbols"
+			},
+			{
 				"command": "fuzzyfind.test",
 				"title": "FuzzyFind: Test"
 			}
@@ -55,34 +63,9 @@
 		"configuration": {
 			"title": "FuzzyFind",
 			"properties": {
-				"fuzzyfind.fzfKeyDown": {
-					"type": "string",
-					"default": "alt-j",
-					"description": "Key to move down in fzf interface"
-				},
-				"fuzzyfind.fzfKeyUp": {
-					"type": "string",
-					"default": "alt-k",
-					"description": "Key move up in fzf interface"
-				},
-				"fuzzyfind.fzfKeyPageDown": {
-					"type": "string",
-					"default": "alt-d",
-					"description": "Key to page down in fzf interface"
-				},
-				"fuzzyfind.fzfKeyPageUp": {
-					"type": "string",
-					"default": "alt-u",
-					"description": "Key to page up in fzf interface"
-				},
-				"fuzzyfind.fzfKeyTop": {
-					"type": "string",
-					"default": "alt-b",
-					"description": "Key to go to top of menu in fzf interface"
-				},
 				"fuzzyfind.fzfKeySelect": {
 					"type": "string",
-					"default": "alt-o",
+					"default": "enter,left-click,alt-o",
 					"description": "Key to select entry in fzf interface"
 				},
 				"fuzzyfind.fzfKeyReload": {
@@ -90,15 +73,15 @@
 					"default": "alt-f",
 					"description": "Key to reload content in fzf interface"
 				},
-				"fuzzyfind.fzfKeyClear": {
-					"type": "string",
-					"default": "ctrl-u",
-					"description": "Key to reload content in fzf interface"
-				},
 				"fuzzyfind.fzfOtherOption": {
 					"type": "string",
-					"default": "--ansi --preview-window=up,2,wrap --preview='echo {}'",
+					"default": "--ansi --bind=double-click:ignore,right-click:ignore,alt-j:down,alt-k:up,alt-d:page-down,alt-u:page-up,alt-b:top,ctrl-u:clear-query --preview-window=up,2,wrap --preview='echo {}'",
 					"description": "fzf command additional option"
+				},
+				"fuzzyfind.logEnable": {
+					"type": "boolean",
+					"default": false,
+					"description": "Enable fuzzyfind to log"
 				},
 				"fuzzyfind.findLineInFilesRgOption": {
 					"type": "string",
@@ -119,6 +102,35 @@
 					"type": "string",
 					"default": ".vscode/gtags.conf",
 					"description": "Path of GNU global configuration"
+				},
+				"fuzzyfind.gnuGlobalDbDirectory": {
+					"type": "string",
+					"default": ".vscode/",
+					"description": "Location of gtags database"
+				},
+				"fuzzyfind.gtagsUpdateDelay": {
+					"type": "number",
+					"default": 5,
+					"description": "Delayed seconds before updating gtags"
+				},
+				"fuzzyfind.gtagsUpdateIgnoreGlob": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"uniqueItems": true,
+					"default": ["**/.git/**", "**/.github/**", "**/.vscode/**"],
+					"description": "The Glob could be irgnored when Gtags update"
+				},
+				"fuzzyfind.gtagsUpdateWatchGlob": {
+					"type": "string",
+					"default": "**/*.{c,cpp,h,hpp,s}",
+					"description": "The Glob be watched when Gtags update"
+				},
+				"fuzzyfind.gtagsWholeUpdateFilesThreshold": {
+					"type": "integer",
+					"default": 10,
+					"description": "The threshold of number of files to choose update option between -u and --single-update"
 				}
 			}
 		}
