@@ -67,3 +67,11 @@ Fix small bug
 ### 0.0.7
 
 * Add option 'fuzzyfind.gnuGlobalOption'
+
+### 0.0.8
+
+* Add gtags auto update functionality
+* Add commands: updateSymbols, createSymbols
+* Add these extention configs: logEnable, gnuGlobalDbDirectory gtagsUpdateDelay gtagsUpdateIgnoreGlob, gtagsUpdateWatchGlob, gtagsWholeUpdateFilesThreshold
+* Remove extention config: fzfKeyDown, fzfKeyUp, fzfKeyPageUp, fzfKeyPageDown, fzfKeyTop, fzfKeyClear
+* Change default value of these extentions configs: fzfKeySelect, fzfOtherOption
