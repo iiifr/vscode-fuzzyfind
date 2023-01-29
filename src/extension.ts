@@ -28,7 +28,7 @@ var gtagsTimer:NodeJS.Timeout;
 var gtagsDirtyFile:Set<string>;
 var gtagsAllDirty:boolean;
 var gtagsUpdating:boolean;
-
+var gtagsBusyIndicator:vscode.StatusBarItem
 
 
 //// global info variables ////////////////////////
@@ -332,6 +332,8 @@ export function activate(context: vscode.ExtensionContext) {
 	gtagsDirtyFile = new Set();
 	gtagsAllDirty = false;
 	gtagsUpdating = false;
+	gtagsBusyIndicator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 9500);
+	context.subscriptions.push(gtagsBusyIndicator);
 	// ---------
 	setup();
 	context.subscriptions.push(vsws.onDidChangeConfiguration(event => {
@@ -473,6 +475,8 @@ export function activate(context: vscode.ExtensionContext) {
 	// --- gtags update
 	// -----------------------------
 	let gtagsUpdateAll = () => {
+		gtagsBusyIndicator.text = "$(sync~spin) " + "Update GTAGS";
+		gtagsBusyIndicator.show();
 		exec(`global ${GNUGLOBAL_CONFIG_OPT} -u`,
 			{env: workspaceEnv, cwd: workspaceUri.fsPath},
 			(error, stdout, stderr) => {
@@ -481,6 +485,7 @@ export function activate(context: vscode.ExtensionContext) {
 					LOG(`stdout: ${stdout}`);
 					LOG(`stderr: ${stderr}`);
 				}
+				gtagsBusyIndicator.hide();
 				gtagsAllDirty = false;
 				gtagsUpdating = false;
 			}
@@ -507,12 +512,15 @@ export function activate(context: vscode.ExtensionContext) {
 				if (FZF_LOG_ENABLE) {
 					LOG("global single-update done");
 				}
+				gtagsBusyIndicator.hide();
 				gtagsAllDirty = false;
 				gtagsUpdating = false;
 			}
 		}
 
 		if (dirtyFiles.length > 0) {
+			gtagsBusyIndicator.text = "$(sync~spin) " + "Update GTAGS";
+			gtagsBusyIndicator.show();
 			if (FZF_LOG_ENABLE) {
 				LOG(`global ${GNUGLOBAL_CONFIG_OPT} --single-update "${dirtyFiles[count]}"`);
 			}
@@ -534,7 +542,6 @@ export function activate(context: vscode.ExtensionContext) {
 			let dirtyFiles = Array.from(gtagsDirtyFile.values());
 			gtagsDirtyFile = new Set();
 			//LOG(`gtags update`)
-			//gtagsUpdateAll();
 			if (gtagsAllDirty) {
 				gtagsUpdateAll();
 			} else {
@@ -548,6 +555,8 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 		if (!gtagsUpdating) {
 			gtagsUpdating = true;
+			gtagsBusyIndicator.text = "$(sync~spin) " + "Create GTAGS";
+			gtagsBusyIndicator.show();
 			exec(`gtags ${GNUGLOBAL_CONFIG_OPT}`,
 				{env: workspaceEnv, cwd: workspaceUri.fsPath},
 				(error, stdout, stderr) => {
@@ -556,6 +565,7 @@ export function activate(context: vscode.ExtensionContext) {
 						LOG(`stdout: ${stdout}`);
 						LOG(`stderr: ${stderr}`);
 					}
+					gtagsBusyIndicator.hide();
 					gtagsUpdating = false;
 				}
 			);
@@ -696,6 +706,12 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 		gtagsCreate();
 	}));
+
+
+	// --------------------------------
+	// --- auto exe commands
+	// --------------------------------
+	vscode.commands.executeCommand('fuzzyfind.updateSymbols');
 }
 
 
