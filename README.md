@@ -79,3 +79,7 @@ Fix small bug
 ### 0.0.9
 
 Fix missing minimatch module dependency bug
+
+### 0.0.10
+
+Fix command findSymbolInFiles missing bug and gtags auto-update stuck bug
