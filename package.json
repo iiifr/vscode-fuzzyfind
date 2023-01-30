@@ -119,7 +119,7 @@
 						"type": "string"
 					},
 					"uniqueItems": true,
-					"default": ["**/.git/**", "**/.github/**", "**/.vscode/**"],
+					"default": [ "**/.*", "**/.*/**", "**/.*/.*" ],
 					"description": "The Glob could be irgnored when Gtags update"
 				},
 				"fuzzyfind.gtagsUpdateWatchGlob": {
