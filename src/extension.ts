@@ -486,7 +486,6 @@ export function activate(context: vscode.ExtensionContext) {
 					LOG(`stderr: ${stderr}`);
 				}
 				gtagsBusyIndicator.hide();
-				gtagsAllDirty = false;
 				gtagsUpdating = false;
 			}
 		);
@@ -513,7 +512,6 @@ export function activate(context: vscode.ExtensionContext) {
 					LOG("global single-update done");
 				}
 				gtagsBusyIndicator.hide();
-				gtagsAllDirty = false;
 				gtagsUpdating = false;
 			}
 		}
@@ -532,7 +530,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}
 	let gtagsUpdate = () => {
 		if (FZF_LOG_ENABLE) {
-			LOG(`>> gtagsUpdate gtagsUpdating=${gtagsUpdating} <<`);
+			LOG(`>> gtagsUpdate() updating=${gtagsUpdating} allDirty=${gtagsAllDirty} dirtyFile.size=${gtagsDirtyFile.size} <<`);
 		}
 		if (gtagsUpdating) {
 			clearTimeout(gtagsTimer);
@@ -540,9 +538,11 @@ export function activate(context: vscode.ExtensionContext) {
 		} else {
 			gtagsUpdating = true;
 			let dirtyFiles = Array.from(gtagsDirtyFile.values());
+			let allDirty = gtagsAllDirty;
 			gtagsDirtyFile = new Set();
+			gtagsAllDirty = false;
 			//LOG(`gtags update`)
-			if (gtagsAllDirty) {
+			if (allDirty) {
 				gtagsUpdateAll();
 			} else {
 				gtagsUpdatePerFile(dirtyFiles);
@@ -551,7 +551,7 @@ export function activate(context: vscode.ExtensionContext) {
 	};
 	let gtagsCreate = () => {
 		if (FZF_LOG_ENABLE) {
-			LOG(`>> gtagsCreate gtagsUpdating=${gtagsUpdating} <<`);
+			LOG(`>> gtagsCreate() updating=${gtagsUpdating} <<`);
 		}
 		if (!gtagsUpdating) {
 			gtagsUpdating = true;
@@ -594,11 +594,10 @@ export function activate(context: vscode.ExtensionContext) {
 				if (!gtagsAllDirty) {
 					gtagsDirtyFile.add(relativePath(uri, workspaceUri));
 					if (gtagsDirtyFile.size >= GTAGS_UPDATE_THRESHOLD) {
+						if (FZF_LOG_ENABLE) {
+							LOG("set gtagsAllDirty true");
+						}
 						gtagsAllDirty = true;
-					}
-					if (FZF_LOG_ENABLE) {
-						//LOG(`gtagsDirtyFile=${Array.from(gtagsDirtyFile.values())}`);
-						LOG(`gtagsAllDirty=${gtagsAllDirty}`);
 					}
 				}
 				gtagsTimer = setTimeout(gtagsUpdate, GTAGS_DELAY_MS);
@@ -691,6 +690,13 @@ export function activate(context: vscode.ExtensionContext) {
 			LOG(`>> cmd findSymbol <<`);
 		}
 		fzfMultiUse.setUsage('findSymbol');
+		fzfMultiUse.show();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findSymbolInFiles', () => {
+		if (FZF_LOG_ENABLE) {
+			LOG(`>> cmd findSymbolInFiles <<`);
+		}
+		fzfMultiUse.setUsage('findSymbolInFiles');
 		fzfMultiUse.show();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.updateSymbols', () => {
