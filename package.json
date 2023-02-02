@@ -75,7 +75,7 @@
 				},
 				"fuzzyfind.fzfOtherOption": {
 					"type": "string",
-					"default": "--ansi --bind=double-click:ignore,right-click:ignore,alt-j:down,alt-k:up,alt-d:page-down,alt-u:page-up,alt-b:top,ctrl-u:clear-query --preview-window=up,2,wrap --preview='echo {}'",
+					"default": "--ansi -d '^[^:]+:[0-9]+?:' --nth=2..  --bind=double-click:ignore,right-click:ignore,alt-j:down,alt-k:up,alt-d:page-down,alt-u:page-up,alt-b:top,ctrl-u:clear-query --preview-window=up,2,wrap --preview='echo {}'",
 					"description": "fzf command additional option"
 				},
 				"fuzzyfind.logEnable": {
