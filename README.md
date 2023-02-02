@@ -83,3 +83,9 @@ Fix missing minimatch module dependency bug
 ### 0.0.10
 
 Fix command findSymbolInFiles missing bug and gtags auto-update stuck bug
+
+### 0.0.11
+
+* Change default value of extentions config fzfOtherOption
+* The function of command findSymbolInFiles is changed to searching gtags symbol
+* The original findSymbolInFiles command is renamed to listAllSymbols
