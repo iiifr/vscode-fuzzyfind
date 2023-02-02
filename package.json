@@ -32,20 +32,24 @@
 				"title": "FuzzyFind: Find the Word under Cursor in Files"
 			},
 			{
+				"command": "fuzzyfind.findSymbolInFiles",
+				"title": "FuzzyFind: Find All Symbol Appearance of the Word under Cursor in Files"
+			},
+			{
 				"command": "fuzzyfind.findDefInFiles",
-				"title": "FuzzyFind: Find symbol definition of the Word under Cursor in Files"
+				"title": "FuzzyFind: Find Symbol Definition of the Word under Cursor in Files"
 			},
 			{
 				"command": "fuzzyfind.findRefInFiles",
-				"title": "FuzzyFind: Find symbol references of the Word under Cursor in Files"
+				"title": "FuzzyFind: Find Symbol References of the Word under Cursor in Files"
 			},
 			{
-				"command": "fuzzyfind.findSymbol",
-				"title": "FuzzyFind: Find Symbol"
+				"command": "fuzzyfind.listSymbol",
+				"title": "FuzzyFind: List Symbols in the Current File"
 			},
 			{
-				"command": "fuzzyfind.findSymbolInFiles",
-				"title": "FuzzyFind: Find Symbol in Files"
+				"command": "fuzzyfind.listAllSymbols",
+				"title": "FuzzyFind: List Symbols in All Files"
 			},
 			{
 				"command": "fuzzyfind.updateSymbols",
@@ -75,7 +79,7 @@
 				},
 				"fuzzyfind.fzfOtherOption": {
 					"type": "string",
-					"default": "--ansi -d '^[^:]+:[0-9]+?:' --nth=2..  --bind=double-click:ignore,right-click:ignore,alt-j:down,alt-k:up,alt-d:page-down,alt-u:page-up,alt-b:top,ctrl-u:clear-query --preview-window=up,2,wrap --preview='echo {}'",
+					"default": "--ansi -d '^[^:]+:[0-9]+?:' --nth=2.. --bind=double-click:ignore,right-click:ignore,alt-j:down,alt-k:up,alt-d:page-down,alt-u:page-up,alt-b:top,ctrl-u:clear-query --preview-window=up,2,wrap --preview='echo {}'",
 					"description": "fzf command additional option"
 				},
 				"fuzzyfind.logEnable": {

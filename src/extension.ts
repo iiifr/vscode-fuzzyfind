@@ -16,10 +16,7 @@ var extActivated:boolean;
 var workspaceEnv:NodeJS.ProcessEnv;
 var workspaceUri:vscode.Uri;
 // ---------------------
-//var findLine:FzfTerminal;
 var findLineInFiles:FzfTerminal;
-//var findSymbol:FzfTerminal;
-//var findSymbolInFiles:FzfTerminal;
 var fzfMultiUse:FzfTerminalMultiUse;
 // ---------------------
 var server: net.Server;
@@ -379,18 +376,6 @@ export function activate(context: vscode.ExtensionContext) {
 		() => { return `rg -H -n ${FINDLINEINFILES_RG_OPT} "$"`; },
 		() => { return 'consistent'; }
 	);
-	//findSymbol = new FzfTerminal(
-	//	'findSymbol',
-	//	'fuzzyfind.findSymbol.lock',
-	//	() => { return `global --result=grep -f "${relativePath(vswin.activeTextEditor?.document.uri)}"` },
-	//	() => { return `${vswin.activeTextEditor?.document.uri.toString()}`}
-	//);
-	//findSymbolInFiles = new FzfTerminal(
-	//	'findSymbolInFiles',
-	//	'fuzzyfind.findSymbolInFiles.lock',
-	//	() => { return `global --result=grep -e ".+"` },
-	//	() => { return 'consistent'}
-	//);
 	fzfMultiUse = new FzfTerminalMultiUse(
 		'fzfTerminal',
 		'fuzzyfind.fzfTerminal.lock',
@@ -406,6 +391,11 @@ export function activate(context: vscode.ExtensionContext) {
 		getWordUnderCursor
 	);
 	fzfMultiUse.addUsage(
+		'findSymbolInFiles',
+		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -s "${getWordUnderCursor()}"`; },
+		getWordUnderCursor
+	);
+	fzfMultiUse.addUsage(
 		'findDefInFiles',
 		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -d "${getWordUnderCursor()}"`; },
 		getWordUnderCursor
@@ -416,12 +406,12 @@ export function activate(context: vscode.ExtensionContext) {
 		getWordUnderCursor
 	);
 	fzfMultiUse.addUsage(
-		'findSymbol',
+		'listSymbol',
 		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -f "${relativePath(vswin.activeTextEditor?.document.uri, workspaceUri)}"`; },
 		() => { return `${vswin.activeTextEditor?.document.uri.toString()}`; }
 	);
 	fzfMultiUse.addUsage(
-		'findSymbolInFiles',
+		'listAllSymbols',
 		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -e ".+"`; },
 		() => { return 'consistent'; }
 	);
@@ -671,6 +661,13 @@ export function activate(context: vscode.ExtensionContext) {
 		fzfMultiUse.setUsage('findWordInFiles');
 		fzfMultiUse.show();
 	}));
+	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findSymbolInFiles', () => {
+		if (FZF_LOG_ENABLE) {
+			LOG(`>> cmd findSymbolInFiles <<`);
+		}
+		fzfMultiUse.setUsage('findSymbolInFiles');
+		fzfMultiUse.show();
+	}));
 	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findDefInFiles', () => {
 		if (FZF_LOG_ENABLE) {
 			LOG(`>> cmd findDefInFiles <<`);
@@ -685,18 +682,18 @@ export function activate(context: vscode.ExtensionContext) {
 		fzfMultiUse.setUsage('findRefInFiles');
 		fzfMultiUse.show();
 	}));
-	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findSymbol', () => {
+	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.listSymbol', () => {
 		if (FZF_LOG_ENABLE) {
-			LOG(`>> cmd findSymbol <<`);
+			LOG(`>> cmd listSymbol <<`);
 		}
-		fzfMultiUse.setUsage('findSymbol');
+		fzfMultiUse.setUsage('listSymbol');
 		fzfMultiUse.show();
 	}));
-	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findSymbolInFiles', () => {
+	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.listAllSymbols', () => {
 		if (FZF_LOG_ENABLE) {
-			LOG(`>> cmd findSymbolInFiles <<`);
+			LOG(`>> cmd listAllSymbols <<`);
 		}
-		fzfMultiUse.setUsage('findSymbolInFiles');
+		fzfMultiUse.setUsage('listAllSymbols');
 		fzfMultiUse.show();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.updateSymbols', () => {
