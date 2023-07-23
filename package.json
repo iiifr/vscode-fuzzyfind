@@ -6,7 +6,7 @@
 		"url": "https://github.com/iiifr/vscode-fuzzyfind"
 	},
 	"publisher": "iiifr",
-	"version": "0.0.11",
+	"version": "0.0.12",
 	"engines": {
 		"vscode": "^1.53.2"
 	},
@@ -30,6 +30,10 @@
 			{
 				"command": "fuzzyfind.findWordInFiles",
 				"title": "FuzzyFind: Find the Word under Cursor in Files"
+			},
+			{
+				"command": "fuzzyfind.findQueryWordInFiles",
+				"title": "FuzzyFind: Find the Query Word in Files"
 			},
 			{
 				"command": "fuzzyfind.findSymbolInFiles",

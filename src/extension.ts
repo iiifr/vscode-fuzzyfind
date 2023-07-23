@@ -192,15 +192,15 @@ class FzfTerminal {
 	readonly lockfile:string;
 	protected terminal:vscode.Terminal|undefined;
 	protected command:()=>string;
-	protected status:()=>string;
+	protected status:()=>string|null;
 	// ---------------
-	protected currentStatus:string;
+	protected currentStatus:string|null;
 	// ---------------
 	protected dupq = (s:string) => {
 		return s.replace(/'/g, "''");
 	};
 
-	constructor(terminalName:string, lockfileName:string, findCommand:()=>string, status:()=>string) {
+	constructor(terminalName: string, lockfileName: string, findCommand: ()=>string, status: ()=>string | null) {
 		this.terminal = undefined;
 		this.name = terminalName;
 		this.lockfile = lockfileName;
@@ -229,6 +229,8 @@ class FzfTerminal {
 	show() {
 		//LOG(`*show* invalidTerm=${this.isInvalidTerminal()} currentSt=${this.currentStatus} st=${this.status()} hasLock=${this.hasLockFile()}`);
 		let typecmd = false;
+		let status = this.status();
+		let stchanged = status ? (this.currentStatus !== status) : true;
 		if (this.isInvalidTerminal()) {
 			this.delTerminal();
 			this.terminal = vswin.createTerminal({
@@ -238,7 +240,7 @@ class FzfTerminal {
 			});
 			typecmd = true;
 		}
-		else if (!this.hasLockFile() || (this.currentStatus !== this.status() && this.hasLockFile())) {
+		else if (!this.hasLockFile() || (stchanged && this.hasLockFile())) {
 			this.terminal?.sendText('\x1b\x1b\x1b', false); //send ESC
 			typecmd = true;
 		}
@@ -254,38 +256,43 @@ class FzfTerminal {
 			this.terminal?.sendText(cmd, true);
 		}
 
-		this.currentStatus = this.status();
+		this.currentStatus = status;
 		this.terminal?.show();
 		//LOG("show");
 	}
 }
 class FzfTerminalMultiUse extends FzfTerminal {
 	private currentUsage:string;
-	private commands:{[key:string]:()=>string};
-	private statuses:{[key:string]:()=>string};
-	private realStatus:()=>string;
+	private commands:{ [key:string]: ()=>string };
+	public params: (string|null)[]; //index 0 is status
 
 	constructor(terminalName:string, lockfileName:string) {
 		super(
 			terminalName,
 			lockfileName,
 			() => { return ''; },
-			() => { return `${this.currentUsage}:${this.realStatus()}`; },
+			() => {
+				return this.params[0] ? `${this.currentUsage}:${this.params[0]}` : null;
+			},
 		);
 		this.currentUsage = '';
 		this.commands = {};
-		this.statuses = {};
-		this.realStatus = () => { return 'undefined'; };
+		this.params = new Array(4);
 	}
 
-	setUsage(usageName:string) {
+	setUsage(usageName: string) {
 		this.currentUsage = usageName;
 		this.command = this.commands[usageName];
-		this.realStatus = this.statuses[usageName];
 	}
-	addUsage(uasgeName:string, findCommand:()=>string, status:()=>string) {
+	setParams(status: string|null,
+		param1: string|null = null, param2: string|null = null, param3: string|null = null) {
+		this.params[0] = status;
+		this.params[1] = param1;
+		this.params[2] = param2;
+		this.params[3] = param3;
+	}
+	addUsage(uasgeName: string, findCommand: ()=>string) {
 		this.commands[uasgeName] = findCommand;
-		this.statuses[uasgeName] = status;
 	}
 }
 
@@ -363,57 +370,47 @@ export function activate(context: vscode.ExtensionContext) {
 	// ---------------------------------
 	// --- initialize fzf terminals
 	// ---------------------------------
-	//findLine = new FzfTerminal(
-	//	'findLine',
-	//	'fuzzyfind.findLine.lock',
-	//	() => { return `rg -H -n "$" "${relativePath(vswin.activeTextEditor?.document.uri)}"` },
-	//	//() => { return `rg --vimgrep "$" "${relativePath(vswin.activeTextEditor?.document.uri)}"` },
-	//	() => { return `${vswin.activeTextEditor?.document.uri.toString()}`}
-	//);
 	findLineInFiles = new FzfTerminal(
 		'findLineInFiles',
-		'fuzzyfind.findLineInFiles.lock',
+		'fuzzyfind1.lock',
 		() => { return `rg -H -n ${FINDLINEINFILES_RG_OPT} "$"`; },
 		() => { return 'consistent'; }
 	);
 	fzfMultiUse = new FzfTerminalMultiUse(
 		'fzfTerminal',
-		'fuzzyfind.fzfTerminal.lock',
+		'fuzzyfind2.lock'
 	);
 	fzfMultiUse.addUsage(
 		'findLine',
-		() => { return `rg -H -n "$" "${relativePath(vswin.activeTextEditor?.document.uri, workspaceUri)}"`; },
-		() => { return `${vswin.activeTextEditor?.document.uri.toString()}`; }
+		() => { return `rg -H -n "$" "${fzfMultiUse.params[1]}"`; }
 	);
 	fzfMultiUse.addUsage(
 		'findWordInFiles',
-		() => { return `rg -H -n ${FINDWORDINFILES_RG_OPT} "${getWordUnderCursor()}"`; },
-		getWordUnderCursor
+		() => { return `rg -H -n ${FINDWORDINFILES_RG_OPT} "${fzfMultiUse.params[1]}"`; }
+	);
+	fzfMultiUse.addUsage(
+		'findQueryWordInFiles',
+		() => { return `rg -H -n ${FINDWORDINFILES_RG_OPT} "${fzfMultiUse.params[1]}"`; }
 	);
 	fzfMultiUse.addUsage(
 		'findSymbolInFiles',
-		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -s "${getWordUnderCursor()}"`; },
-		getWordUnderCursor
+		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -s "${fzfMultiUse.params[1]}"`; }
 	);
 	fzfMultiUse.addUsage(
 		'findDefInFiles',
-		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -d "${getWordUnderCursor()}"`; },
-		getWordUnderCursor
+		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -d "${fzfMultiUse.params[1]}"`; }
 	);
 	fzfMultiUse.addUsage(
 		'findRefInFiles',
-		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -r "${getWordUnderCursor()}"`; },
-		getWordUnderCursor
+		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -r "${fzfMultiUse.params[1]}"`; }
 	);
 	fzfMultiUse.addUsage(
 		'listSymbol',
-		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -f "${relativePath(vswin.activeTextEditor?.document.uri, workspaceUri)}"`; },
-		() => { return `${vswin.activeTextEditor?.document.uri.toString()}`; }
+		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -f "${fzfMultiUse.params[1]}"`; }
 	);
 	fzfMultiUse.addUsage(
 		'listAllSymbols',
-		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -e ".+"`; },
-		() => { return 'consistent'; }
+		() => { return `global ${GNUGLOBAL_OPT} ${GNUGLOBAL_CONFIG_OPT} --result=grep -e ".+"`; }
 	);
 
 
@@ -646,6 +643,10 @@ export function activate(context: vscode.ExtensionContext) {
 			LOG(`>> cmd findLine <<`);
 		}
 		fzfMultiUse.setUsage('findLine');
+		fzfMultiUse.setParams(
+			`${vswin.activeTextEditor?.document.uri.toString()}`,
+			`${relativePath(vswin.activeTextEditor?.document.uri, workspaceUri)}`
+		);
 		fzfMultiUse.show();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findLineInFiles', () => {
@@ -658,28 +659,45 @@ export function activate(context: vscode.ExtensionContext) {
 		if (FZF_LOG_ENABLE) {
 			LOG(`>> cmd findWordInFiles <<`);
 		}
+		const word = getWordUnderCursor();
 		fzfMultiUse.setUsage('findWordInFiles');
+		fzfMultiUse.setParams(word, word);
+		fzfMultiUse.show();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findQueryWordInFiles', async () => {
+		if (FZF_LOG_ENABLE) {
+			LOG(`>> cmd findQueryWordInFiles <<`);
+		}
+		const word = await vswin.showInputBox({ prompt: "Input the word to find" });
+		fzfMultiUse.setUsage('findQueryWordInFiles');
+		fzfMultiUse.setParams(null, word);
 		fzfMultiUse.show();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findSymbolInFiles', () => {
 		if (FZF_LOG_ENABLE) {
 			LOG(`>> cmd findSymbolInFiles <<`);
 		}
+		const word = getWordUnderCursor();
 		fzfMultiUse.setUsage('findSymbolInFiles');
+		fzfMultiUse.setParams(word, word);
 		fzfMultiUse.show();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findDefInFiles', () => {
 		if (FZF_LOG_ENABLE) {
 			LOG(`>> cmd findDefInFiles <<`);
 		}
+		const word = getWordUnderCursor();
 		fzfMultiUse.setUsage('findDefInFiles');
+		fzfMultiUse.setParams(word, word);
 		fzfMultiUse.show();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.findRefInFiles', () => {
 		if (FZF_LOG_ENABLE) {
 			LOG(`>> cmd findRefInFiles <<`);
 		}
+		const word = getWordUnderCursor();
 		fzfMultiUse.setUsage('findRefInFiles');
+		fzfMultiUse.setParams(word, word);
 		fzfMultiUse.show();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.listSymbol', () => {
@@ -687,6 +705,10 @@ export function activate(context: vscode.ExtensionContext) {
 			LOG(`>> cmd listSymbol <<`);
 		}
 		fzfMultiUse.setUsage('listSymbol');
+		fzfMultiUse.setParams(
+			`${vswin.activeTextEditor?.document.uri.toString()}`,
+			`${relativePath(vswin.activeTextEditor?.document.uri, workspaceUri)}`
+		);
 		fzfMultiUse.show();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.listAllSymbols', () => {
@@ -694,6 +716,7 @@ export function activate(context: vscode.ExtensionContext) {
 			LOG(`>> cmd listAllSymbols <<`);
 		}
 		fzfMultiUse.setUsage('listAllSymbols');
+		fzfMultiUse.setParams('consistent');
 		fzfMultiUse.show();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('fuzzyfind.updateSymbols', () => {

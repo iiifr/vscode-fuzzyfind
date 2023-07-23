@@ -89,3 +89,7 @@ Fix command findSymbolInFiles missing bug and gtags auto-update stuck bug
 * Change default value of extentions config fzfOtherOption
 * The function of command findSymbolInFiles is changed to searching gtags symbol
 * The original findSymbolInFiles command is renamed to listAllSymbols
+
+### 0.0.12
+
+* Add command 'fuzzyfind.findQueryWordInFiles'
