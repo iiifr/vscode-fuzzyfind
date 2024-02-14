@@ -25,12 +25,12 @@ var gtagsTimer:NodeJS.Timeout;
 var gtagsDirtyFile:Set<string>;
 var gtagsAllDirty:boolean;
 var gtagsUpdating:boolean;
-var gtagsBusyIndicator:vscode.StatusBarItem
+var gtagsBusyIndicator:vscode.StatusBarItem;
 
 
 //// global info variables ////////////////////////
-var LOG_FILENAME:string
-var LOG_PATH:string
+var LOG_FILENAME:string;
+var LOG_PATH:string;
 // --------------
 var PIPE_NAME:string;
 var PIPE_PATH:string;
@@ -236,7 +236,8 @@ class FzfTerminal {
 			this.terminal = vswin.createTerminal({
 				name: this.name,
 				env: {FZF_DEFAULT_OPTS},
-				strictEnv: false
+				strictEnv: false,
+				shellPath: "cmd.exe"
 			});
 			typecmd = true;
 		}
@@ -246,12 +247,21 @@ class FzfTerminal {
 		}
 
 		if (typecmd) {
+			//let cmd = '';
+			//cmd += `     echo "" > "${FUZZYFIND_LOCKFILE_PATH+this.lockfile}"; `;
+			//cmd += `$env:FZF_DEFAULT_COMMAND='${this.dupq(this.command())}'; `;
+			//let opts = addFzfBindOpt(vsws.getConfiguration("fuzzyfind").get("fzfKeyReload") ?? "", "reload($env:FZF_DEFAULT_COMMAND)");
+			//cmd += `fzf ${opts}; `;
+			//cmd += `rm -Force "${FUZZYFIND_LOCKFILE_PATH+this.lockfile}"; `;
+			////LOG(`*CMD* ${cmd}`)
+			//this.terminal?.sendText(cmd, true);
+
 			let cmd = '';
-			cmd += `     echo "" > "${FUZZYFIND_LOCKFILE_PATH+this.lockfile}"; `;
-			cmd += `$env:FZF_DEFAULT_COMMAND='${this.dupq(this.command())}'; `;
-			let opts = addFzfBindOpt(vsws.getConfiguration("fuzzyfind").get("fzfKeyReload") ?? "", "reload($env:FZF_DEFAULT_COMMAND)");
-			cmd += `fzf ${opts}; `;
-			cmd += `rm -Force "${FUZZYFIND_LOCKFILE_PATH+this.lockfile}"; `;
+			cmd += ` rem. > "${FUZZYFIND_LOCKFILE_PATH+this.lockfile}" & `;
+			cmd += `set FZF_DEFAULT_COMMAND=${this.command()} & `;
+			let opts = addFzfBindOpt(vsws.getConfiguration("fuzzyfind").get("fzfKeyReload") ?? "", "reload(%FZF_DEFAULT_COMMAND%)");
+			cmd += `fzf ${opts} & `;
+			cmd += `del /S /Q "${FUZZYFIND_LOCKFILE_PATH+this.lockfile}"`;
 			//LOG(`*CMD* ${cmd}`)
 			this.terminal?.sendText(cmd, true);
 		}
