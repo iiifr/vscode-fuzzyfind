@@ -93,3 +93,7 @@ Fix command findSymbolInFiles missing bug and gtags auto-update stuck bug
 ### 0.0.12
 
 * Add command 'fuzzyfind.findQueryWordInFiles'
+
+### 0.0.13
+
+* Change executing shell to cmd.exe
