@@ -237,7 +237,8 @@ class FzfTerminal {
 				name: this.name,
 				env: {FZF_DEFAULT_OPTS},
 				strictEnv: false,
-				shellPath: "cmd.exe"
+				shellPath: "cmd.exe",
+				shellArgs: ["/v:on"]
 			});
 			typecmd = true;
 		}
@@ -257,9 +258,9 @@ class FzfTerminal {
 			//this.terminal?.sendText(cmd, true);
 
 			let cmd = '';
-			cmd += ` rem. > "${FUZZYFIND_LOCKFILE_PATH+this.lockfile}" & `;
+			cmd += `     rem. > "${FUZZYFIND_LOCKFILE_PATH+this.lockfile}" & `;
 			cmd += `set FZF_DEFAULT_COMMAND=${this.command()} & `;
-			let opts = addFzfBindOpt(vsws.getConfiguration("fuzzyfind").get("fzfKeyReload") ?? "", "reload(%FZF_DEFAULT_COMMAND%)");
+			let opts = addFzfBindOpt(vsws.getConfiguration("fuzzyfind").get("fzfKeyReload") ?? "", "reload(!FZF_DEFAULT_COMMAND!)");
 			cmd += `fzf ${opts} & `;
 			cmd += `del /S /Q "${FUZZYFIND_LOCKFILE_PATH+this.lockfile}"`;
 			//LOG(`*CMD* ${cmd}`)

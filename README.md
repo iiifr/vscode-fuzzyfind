@@ -97,3 +97,7 @@ Fix command findSymbolInFiles missing bug and gtags auto-update stuck bug
 ### 0.0.13
 
 * Change executing shell to cmd.exe
+
+### 0.0.14
+
+* Fix using cmd.exe bug
